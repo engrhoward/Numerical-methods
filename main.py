@@ -4,9 +4,15 @@ import matplotlib.pyplot as plt
 
 st.title("Numerical Methods")
 
+
 non_linear, linear, integ = st.tabs(['Non-Linear Equation',
                             'Linear Equations',
                             'Numerical Integration'])
+
+# create a function that converts ^ to **
+def convert_syntax(input_str):
+    output_str = input_str.replace('^','**')
+    return output_str
 
 with non_linear:
     tab_a, tab_b, tab_c = st.tabs(["Bisection Method",
@@ -24,12 +30,6 @@ with integ:
         
         #input function
         function = st.text_input("Function")
-
-        # create a function that converts ^ to **
-        def convert_syntax(input_str):
-            output_str = input_str.replace('^','**')
-            return output_str
-        
         
         col1, col2 = st.columns(2) # create column for upper and lower inpt
         with col1:
@@ -38,7 +38,7 @@ with integ:
             lower_limit = st.number_input("Lower Limit", step = 1)
 
         #slider for number of divisions
-        bins = st.slider("Enter number of divisions", 2,10,20)
+        bins = st.slider("Enter number of divisions", 2,100,20)
         
         #computation of delta_x
         delta_x = (float(upper_limit) - float(lower_limit))/bins
@@ -69,7 +69,7 @@ with integ:
 
         if function and lower_limit is not None and upper_limit is not None:
             result = integral
-            st.write("Approximate integral:", result)
+            st.markdown(f"Approximate integral: {result}")
 
         
         if function and lower_limit is not None and upper_limit is not None:
@@ -78,9 +78,41 @@ with integ:
 
             plt.figure(figsize=(10, 6))
             plt.plot(x_values, y_values, label=f'Function: {function}')
-            plt.fill_between(x_midpoints, 0, [f(x) for x in x_midpoints], alpha=0.2, label='Rectangular Area')
+            plt.bar(x_midpoints, [f(x) for x in x_midpoints], width=delta_x, alpha=0.5, 
+                    label='Rectangular Approximation', edgecolor = 'black',
+                    linewidth = 2)
+            plt.scatter(x_midpoints, [f(x) for x in x_midpoints], color = 'black')
             plt.xlabel('x')
             plt.ylabel('f(x)')
             plt.title('Function and Rectangular Approximation')
             plt.legend()
             st.pyplot(plt)
+
+    with tab_b:
+        function_2 = st.text_input('Function', key = 'Trapezoidal')
+
+        trap_upper, trap_lower = st.columns(2)
+
+        with trap_upper:
+            upper_limit = st.number_input("Upper Limit", step = 1, key = 'upper_trap')
+        with trap_lower:
+            lower_limit = st.number_input("Lower Limit", step = 1, key = 'lower_trap')
+
+        #slider for number of divisions
+        bins = st.slider("Enter number of divisions", 2,100,20, key ='trapezoidal')
+
+        #computation of delta_x
+        delta_x = (float(upper_limit) - float(lower_limit))/bins
+        
+        def f(x):
+            return eval(convert_syntax(function_2))
+        
+        #latex of function
+        if function and lower_limit is not None and upper_limit is not None:
+            definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_2} \, dx'
+            st.latex(definite_integral_latex)
+
+        st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
+
+
+
