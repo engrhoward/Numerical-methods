@@ -27,7 +27,24 @@ with integ:
 
     
     with tab_a:
-        
+        st.markdown(
+            """
+            <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+                <p style="font-size: 18px; font-weight: bold; color: #333;">Rectangular Summation (Midpoint)</p>
+                <p style="font-size: 16px; line-height: 1.4; color: #555;">
+                    Rectangular summation (midpoint) is a numerical integration technique used to estimate the area under the curve 
+                    by dividing it into smaller rectangles and adding all of them together.
+                </p>
+                <p style="font-size: 16px; line-height: 1.4; color: #555;">
+                    The summation form of this technique is expressed as:
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.latex(r'\int_a^b f(x) \, dx \approx \sum_{i=1}^{n} f\left(\frac{x_{i-1}+x_i}{2}\right) \cdot \Delta x')
+
         #input function
         function = st.text_input("Function")
         
@@ -51,7 +68,7 @@ with integ:
             definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function} \, dx'
             st.latex(definite_integral_latex)
 
-        st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
+        #st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
 
         
         def rectangular_integration(func,lower_limit,upper_limit,bins):
@@ -68,8 +85,16 @@ with integ:
         integral, x_midpoints = rectangular_integration(f, lower_limit, upper_limit, bins)
 
         if function and lower_limit is not None and upper_limit is not None:
-            result = integral
-            st.markdown(f"Approximate integral: {result}")
+            result = rectangular_integration(f, lower_limit, upper_limit, bins)
+            st.markdown(
+                f"<div style=padding: 10px; border-radius: 5px;'>"
+                f"<p style='font-size: 18px; font-weight: bold; color: #333;'>The Approximate integral is:</p>"
+                f"<p style='font-size: 16px; line-height: 1.4; color: #555;'>"
+                f"<p style='font-size: 20px; font-weight: bold;'>{integral}</p>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
 
         
         if function and lower_limit is not None and upper_limit is not None:
@@ -113,6 +138,41 @@ with integ:
             st.latex(definite_integral_latex)
 
         st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
+        
+        def trapezoidal_integration(func, lower_limit, upper_limit, bins):
+            integral = 0.0
 
+            x_values = np.linspace(lower_limit, upper_limit, bins + 1)
+            y_values = [func(x) for x in x_values]
 
+            # Create a figure for plotting
+            plt.figure(figsize=(10, 6))
 
+            for i in range(1, bins):
+                integral += y_values[i]
+
+                # Plot each trapezoid
+                plt.fill_between([x_values[i - 1], x_values[i]], [0, 0], [y_values[i - 1], y_values[i]],
+                             alpha=0.5, edgecolor='black', facecolor='none')
+
+            integral += (y_values[0] + y_values[-1]) / 2
+            integral *= delta_x
+
+            # Plot the function curve
+            x_values = np.linspace(lower_limit, upper_limit, 100)
+            y_values = [func(x) for x in x_values]
+            plt.plot(x_values, y_values, label=f'Function: {function_2}')
+
+            # Customize the plot
+            plt.xlabel('x')
+            plt.ylabel('f(x)')
+            plt.title('Function and Trapezoidal Approximation')
+            plt.legend()
+
+            return integral
+
+        if function_2 and lower_limit is not None and upper_limit is not None:
+            result = trapezoidal_integration(f, lower_limit, upper_limit, bins)
+            st.markdown(f"Approximate integral (Trapezoidal Method): {result}")
+
+        st.pyplot(plt)
