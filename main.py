@@ -70,33 +70,32 @@ with integ:
 
         #st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
 
-        
-        def rectangular_integration(func,lower_limit,upper_limit,bins):
+        def rectangular_integration(func,lower_limit, upper_limit ,bins):
             integral = 0.0
 
             x_midpoints = []
             for i in range(bins):
                 x_midpoint = lower_limit + (i+0.5)*delta_x
                 integral = integral + func(x_midpoint)*delta_x
-
+                
                 x_midpoints.append(x_midpoint)
                 
             return integral, x_midpoints
+        
         integral, x_midpoints = rectangular_integration(f, lower_limit, upper_limit, bins)
+
 
         if function and lower_limit is not None and upper_limit is not None:
             result = rectangular_integration(f, lower_limit, upper_limit, bins)
             st.markdown(
-                f"<div style=padding: 10px; border-radius: 5px;'>"
-                f"<p style='font-size: 18px; font-weight: bold; color: #333;'>The Approximate integral is:</p>"
+                f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px;'>"
+                f"<p style='font-size: 18px; font-weight: bold; color: #333;'>The Approximate integral</p>"
                 f"<p style='font-size: 16px; line-height: 1.4; color: #555;'>"
                 f"<p style='font-size: 20px; font-weight: bold;'>{integral}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
 
-
-        
         if function and lower_limit is not None and upper_limit is not None:
             x_values = np.linspace(lower_limit, upper_limit, 100)
             y_values = [f(x) for x in x_values]
@@ -113,32 +112,27 @@ with integ:
             plt.legend()
             st.pyplot(plt)
 
-#adding comment here to try to push
-print("hello")
-
-print("hello")
-
     with tab_b:
-        function_2 = st.text_input('Function', key = 'Trapezoidal')
+        function_2 = st.text_input('Function', key='Trapezoidal')
 
         trap_upper, trap_lower = st.columns(2)
 
         with trap_upper:
-            upper_limit = st.number_input("Upper Limit", step = 1, key = 'upper_trap')
+            upper_limit = st.number_input("Upper Limit", step=1, key='upper_trap')
         with trap_lower:
-            lower_limit = st.number_input("Lower Limit", step = 1, key = 'lower_trap')
+            lower_limit = st.number_input("Lower Limit", step=1, key='lower_trap')
 
         #slider for number of divisions
-        bins = st.slider("Enter number of divisions", 2,100,20, key ='trapezoidal')
+        bins = st.slider("Enter number of divisions", 2, 100, 20, key='trapezoidal')
 
         #computation of delta_x
-        delta_x = (float(upper_limit) - float(lower_limit))/bins
+        delta_x = (float(upper_limit) - float(lower_limit)) / bins
         
         def f(x):
             return eval(convert_syntax(function_2))
-        
+
         #latex of function
-        if function and lower_limit is not None and upper_limit is not None:
+        if function_2 and lower_limit is not None and upper_limit is not None:
             definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_2} \, dx'
             st.latex(definite_integral_latex)
 
@@ -158,7 +152,7 @@ print("hello")
 
                 # Plot each trapezoid
                 plt.fill_between([x_values[i - 1], x_values[i]], [0, 0], [y_values[i - 1], y_values[i]],
-                             alpha=0.5, edgecolor='black', facecolor='none')
+                                alpha=0.5, edgecolor='black', facecolor='none')
 
             integral += (y_values[0] + y_values[-1]) / 2
             integral *= delta_x
