@@ -1,3 +1,4 @@
+'''
 import matplotlib.pyplot as plt
 
 x_values = [1,2,3,4,5]
@@ -14,24 +15,9 @@ for i in range(len(x_values)):
              color = 'red', linestyle = "--")
 
 plt.show()
+'''
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+'''
 def rectangular_integration(func, lower_limit, upper_limit, bins):
     integral = 0.0
 
@@ -51,3 +37,51 @@ def rectangular_integration(func, lower_limit, upper_limit, bins):
         integral = default_function(lower_limit) * (upper_limit - lower_limit)
 
     return integral, x_midpoints
+'''
+import numpy as np
+
+function_3 = lambda x: 9*(x**3) - 4*x + 3/x
+lower_limit = 1
+upper_limit = 6
+bins = 10
+
+delta_x = (upper_limit - lower_limit) / bins
+
+
+def simpsons_rule(func, lower_limit, upper_limit, bins):
+
+    x_values = np.linspace(lower_limit, upper_limit, bins+1)
+    y_values = [func(x) for x in x_values]
+
+    integral = 0.0
+
+    area_1 = func(x_values[0])
+    area_last = func(x_values[-1])
+
+    #get odd summation
+    odd_area = 0.0
+    odd_indiv_area = [func(x) for x in x_values[1::2]]
+
+    for i in odd_indiv_area:
+        odd_area = odd_area + i
+
+
+    # get even summation
+
+    even_area = 0.0
+    even_indiv_area = [func(x) for x in x_values[2:-1:2]]
+
+    for i in even_indiv_area:
+        even_area = even_area + i
+
+    integral = (delta_x/3) * (area_1 + 4*(odd_area) + 2*(even_area) +area_last)
+
+    return x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral
+
+
+x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral= simpsons_rule(function_3, lower_limit, upper_limit, bins)
+
+even_values = x_values[1::2]
+odd_values = x_values[2:-1:2]
+
+

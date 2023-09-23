@@ -101,7 +101,6 @@ with integ:
             plt.title('Function and Rectangular Approximation')
             plt.legend()
             st.pyplot(plt)
-
     with tab_b:
         st.markdown(
             """
@@ -188,3 +187,43 @@ with integ:
         if function_2 and lower_limit is not None and upper_limit is not None:
             result = trapezoidal_integration(f_2, lower_limit, upper_limit, bins)
             st.pyplot(plt)
+    with tab_c:
+        st.markdown(
+            """
+            <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+                <p style="font-size: 18px; font-weight: bold; color: #333;">Simpson's 1/3 rule Summation (Midpoint)</p>
+                <p style="font-size: 16px; line-height: 1.4; color: #555;">
+                    Mamaya na kita bigyan ng intro.
+                </p>
+                <p style="font-size: 16px; line-height: 1.4; color: #555;">
+                    The summation form of this technique is expressed as:
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        #insert latex of the algorithm
+        st.latex(r'\int_a^b f(x) \, dx \approx \frac{\Delta x}{3} \left[ f(a) + 4\sum_{i=1}^{n-1} f(x_{2i-1}) + 2\sum_{i=1}^{n-2} f(x_{2i}) + f(b) \right]')
+
+
+        function_3 = st.text_input('Function', key='Simpsons')
+
+        simp_upper, simp_lower = st.columns(2)
+
+        with simp_upper:
+            upper_limit = st.number_input("Upper Limit", step=1, key='upper_simp')
+        with simp_lower:
+            lower_limit = st.number_input("Lower Limit", step=1, key='lower_simp')
+
+        #slider for number of divisions
+        bins = st.slider("Enter number of divisions", 2, 100, 20, key='simpsons')
+
+        #computation of delta_x
+        delta_x = (float(upper_limit) - float(lower_limit)) / bins
+        
+        def f_2(x):
+            return eval(convert_syntax(function_3))
+        
+        def simpsons_rule(func, lower_limit, upper_limit, bins):
+            
