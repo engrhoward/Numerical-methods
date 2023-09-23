@@ -63,10 +63,6 @@ with integ:
         def f(x):
             return eval(convert_syntax(function))
         
-        #latex of function
-        if function and lower_limit is not None and upper_limit is not None:
-            definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function} \, dx'
-            st.latex(definite_integral_latex)
 
         #st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
 
@@ -84,18 +80,12 @@ with integ:
         
         integral, x_midpoints = rectangular_integration(f, lower_limit, upper_limit, bins)
 
-
+        # latex of function and answer
         if function and lower_limit is not None and upper_limit is not None:
-            result = rectangular_integration(f, lower_limit, upper_limit, bins)
-            st.markdown(
-                f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px;'>"
-                f"<p style='font-size: 18px; font-weight: bold; color: #333;'>The Approximate integral</p>"
-                f"<p style='font-size: 16px; line-height: 1.4; color: #555;'>"
-                f"<p style='font-size: 20px; font-weight: bold;'>{integral}</p>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
+            definite_integral_latex = rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function} \, dx = {integral}'
+            st.latex(definite_integral_latex)
 
+        # graph of function and approximate integral
         if function and lower_limit is not None and upper_limit is not None:
             x_values = np.linspace(lower_limit, upper_limit, 100)
             y_values = [f(x) for x in x_values]
@@ -144,15 +134,10 @@ with integ:
         #computation of delta_x
         delta_x = (float(upper_limit) - float(lower_limit)) / bins
         
-        def f(x):
+        def f_2(x):
             return eval(convert_syntax(function_2))
 
-        #latex of function
-        if function_2 and lower_limit is not None and upper_limit is not None:
-            definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_2} \, dx'
-            st.latex(definite_integral_latex)
-
-        st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
+        #st.latex(r'\delta_x = \frac{\text{Upper Limit} - \text{Lower Limit}}{\text{Bins}} = \frac{%d - %d}{%d} = %.2f' % (upper_limit, lower_limit, bins, delta_x))
         
         def trapezoidal_integration(func, lower_limit, upper_limit, bins):
             integral = 0.0
@@ -172,6 +157,11 @@ with integ:
 
             integral += (y_values[0] + y_values[-1]) / 2
             integral *= delta_x
+
+            #latex of function
+            if function_2 and lower_limit is not None and upper_limit is not None:
+                definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_2} \, dx= {integral}'
+                st.latex(definite_integral_latex)
 
             # Plot the function curve
             x_values_exact = np.linspace(lower_limit, upper_limit, 100)
@@ -196,7 +186,5 @@ with integ:
             return integral
 
         if function_2 and lower_limit is not None and upper_limit is not None:
-            result = trapezoidal_integration(f, lower_limit, upper_limit, bins)
-            st.markdown(f"Approximate integral (Trapezoidal Method): {result}")
-
-        st.pyplot(plt)
+            result = trapezoidal_integration(f_2, lower_limit, upper_limit, bins)
+            st.pyplot(plt)
