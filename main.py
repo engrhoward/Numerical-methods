@@ -10,8 +10,18 @@ non_linear, linear, integ = st.tabs(['Non-Linear Equation',
                             'Numerical Integration'])
 
 # create a function that converts ^ to **
+
 def convert_syntax(input_str):
+    #accomodating exponents
     output_str = input_str.replace('^','**')
+    
+
+    #accomodating trig functions
+
+    trig_functions = ['sin','cos', 'tan','cot', 'csc','sec']
+
+    for trig_func in trig_functions:
+        output_str = output_str.replace(trig_func + '(', 'np.' + trig_func + '(')
     return output_str
 
 with non_linear:
@@ -46,7 +56,20 @@ with integ:
         st.latex(r'\int_a^b f(x) \, dx \approx \sum_{i=1}^{n} f\left(\frac{x_{i-1}+x_i}{2}\right) \cdot \Delta x')
 
         #input function
-        function = st.text_input("Function")
+        function = st.text_input("Function", key = 'rectangular')
+
+        def convert_syntax(input_str):
+            #accomodating exponents
+            output_str = input_str.replace('^','**')
+            
+
+            #accomodating trig functions
+
+            trig_functions = ['sin','cos', 'tan','cot', 'csc','sec']
+
+            for trig_func in trig_functions:
+                output_str = output_str.replace(trig_func + '(', 'np.' + trig_func + '(')
+            return output_str
         
         col1, col2 = st.columns(2) # create column for upper and lower inpt
         with col1:
@@ -100,6 +123,7 @@ with integ:
             plt.ylabel('f(x)')
             plt.title('Function and Rectangular Approximation')
             plt.legend()
+            
             st.pyplot(plt)
     with tab_b:
         st.markdown(
@@ -119,6 +143,7 @@ with integ:
         st.latex(r'\int_a^b f(x) \, dx \approx \frac{\Delta x}{2} \left[ f(a) + 2\sum_{i=1}^{n-1} f(x_i) + f(b) \right]')
 
         function_2 = st.text_input('Function', key='Trapezoidal')
+        
 
         trap_upper, trap_lower = st.columns(2)
 
@@ -188,6 +213,8 @@ with integ:
             result = trapezoidal_integration(f_2, lower_limit, upper_limit, bins)
             st.pyplot(plt)
     with tab_c:
+        st.write("hello")
+
         st.markdown(
             """
             <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
@@ -205,8 +232,7 @@ with integ:
         
         #insert latex of the algorithm
         st.latex(r'\int_a^b f(x) \, dx \approx \frac{\Delta x}{3} \left[ f(a) + 4\sum_{i=1}^{n-1} f(x_{2i-1}) + 2\sum_{i=1}^{n-2} f(x_{2i}) + f(b) \right]')
-
-
+        
         function_3 = st.text_input('Function', key='Simpsons')
 
         simp_upper, simp_lower = st.columns(2)
@@ -217,7 +243,8 @@ with integ:
             lower_limit = st.number_input("Lower Limit", step=1, key='lower_simp')
 
         # Slider for the number of divisions
-        bins = st.slider("Enter number of divisions", 2, 100, 20, key='simpsons')
+        bins = st.slider("Enter number of divisions (Even numbers only)"
+                         , 2, 100, 20, step = 2, key='simpsons')
 
         # Computation of delta_x
         delta_x = (float(upper_limit) - float(lower_limit)) / bins
@@ -230,8 +257,8 @@ with integ:
             x_values_exact = np.linspace(lower_limit, upper_limit, 1000)
             y_values_exact = [func(x) for x in x_values_exact]
 
-            x_values = np.linspace(lower_limit, upper_limit, bins + 1)
-            y_values = [func(x) for x in x_values]
+            x_values_simp = np.linspace(lower_limit, upper_limit, bins + 1)
+            y_values_simp = [func(x) for x in x_values]
 
             integral = 0.0
 
@@ -240,55 +267,52 @@ with integ:
 
             # Get odd summation
             odd_area = 0.0
-            odd_indiv_area = [func(x) for x in x_values[1::2]]
+            odd_indiv_area = [func(x) for x in x_values_simp[1::2]]
 
             for i in odd_indiv_area:
                 odd_area = odd_area + i
 
             # Get even summation
             even_area = 0.0
-            even_indiv_area = [func(x) for x in x_values[2:-1:2]]
+            even_indiv_area = [func(x) for x in x_values_simp[2:-1:2]]
 
             for i in even_indiv_area:
                 even_area = even_area + i
 
             integral = (delta_x / 3) * (area_1 + 4 * (odd_area) + 2 * (even_area) + area_last)
+            
 
-            return x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
-
+            return x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
+        
         # Call the simpsons_rule function and retrieve the results
-        x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact = simpsons_rule(f_3, lower_limit, upper_limit, bins)
+        x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact = simpsons_rule(f_3, lower_limit, upper_limit, bins)
 
-        window_size = 3
-
-        # Create lists to store coefficients and corresponding x values for each subset
-        subset_coefficients = []
-        subset_x_values = []
-
-        # Iterate through the data to create subsets and fit polynomials
-        for i in range(len(x_values) - window_size + 1):
-            x_subset = x_values[i:i + window_size]
-            y_subset = y_values[i:i + window_size]
-
-            # Fit a polynomial to the current subset
-            coefficients = np.polyfit(x_subset, y_subset, 2)  # You can change the degree as needed
-            subset_coefficients.append(coefficients)
-            subset_x_values.append(x_subset)
-
+        if function_3 and lower_limit is not None and upper_limit is not None:
+                definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_3} \, dx= {integral}'
+                st.latex(definite_integral_latex)
+        
         # Plot the data points and the fitted polynomials for each subset
         plt.plot(x_values_exact, y_values_exact, label='Data Points', color='blue', alpha=0.5)
+        plt.scatter(x_values, y_values)
+
+        subset_coefficients = []
+        subset_x_values = []
 
         for coefficients, x_subset in zip(subset_coefficients, subset_x_values):
             x_fit = np.linspace(min(x_subset), max(x_subset), 100)
             y_fit = np.polyval(coefficients, x_fit)
             plt.plot(x_fit, y_fit, linestyle='--', color='red', alpha=0.5)
 
+            plt.vlines(x_subset, 0, [np.polyval(coefficients, x) for x in x_subset], colors='green', alpha=0.5)
+
+            plt.fill_between(x_fit, 0, y_fit, where=(y_fit > 0), color='blue', alpha=0.5)
+
         plt.xlabel('x')
         plt.ylabel('f(x)')
         plt.title('Polynomial Fits for Subsets of Data')
         plt.legend()
-        plt.grid(True)
 
-        st.pyplot(plt)
 
+        if function_3 and lower_limit is not None and upper_limit is not None:
+            st.pyplot(plt)
     
