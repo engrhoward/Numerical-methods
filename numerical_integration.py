@@ -39,6 +39,7 @@ def rectangular_integration(func, lower_limit, upper_limit, bins):
     return integral, x_midpoints
 '''
 import numpy as np
+import matplotlib.pyplot as plt
 
 function_3 = lambda x: 9*(x**3) - 4*x + 3/x
 lower_limit = 1
@@ -49,6 +50,9 @@ delta_x = (upper_limit - lower_limit) / bins
 
 
 def simpsons_rule(func, lower_limit, upper_limit, bins):
+    x_values_exact = np.linspace(lower_limit, upper_limit, 1000)
+    y_values_exact = [func(x) for x in x_values_exact]
+
 
     x_values = np.linspace(lower_limit, upper_limit, bins+1)
     y_values = [func(x) for x in x_values]
@@ -76,12 +80,42 @@ def simpsons_rule(func, lower_limit, upper_limit, bins):
 
     integral = (delta_x/3) * (area_1 + 4*(odd_area) + 2*(even_area) +area_last)
 
-    return x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral
+    return x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
 
 
-x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral= simpsons_rule(function_3, lower_limit, upper_limit, bins)
+x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact = simpsons_rule(function_3, lower_limit, upper_limit, bins)
 
-even_values = x_values[1::2]
-odd_values = x_values[2:-1:2]
+window_size = 3
+
+# Create lists to store coefficients and corresponding x values for each subset
+subset_coefficients = []
+subset_x_values = []
+
+# Iterate through the data to create subsets and fit polynomials
+for i in range(len(x_values) - window_size + 1):
+    x_subset = x_values[i:i + window_size]
+    y_subset = y_values[i:i + window_size]
+
+    # Fit a polynomial to the current subset
+    coefficients = np.polyfit(x_subset, y_subset, 2)  # You can change the degree as needed
+    subset_coefficients.append(coefficients)
+    subset_x_values.append(x_subset)
+
+# Plot the data points and the fitted polynomials for each subset
+plt.plot(x_values_exact, y_values_exact, label='Data Points', color='blue', alpha = 0.5)
+
+for coefficients, x_subset in zip(subset_coefficients, subset_x_values):
+    x_fit = np.linspace(min(x_subset), max(x_subset), 100)
+    y_fit = np.polyval(coefficients, x_fit)
+    plt.plot(x_fit, y_fit, linestyle='--', color='red', alpha = 0.5)
+
+
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.title('Polynomial Fits for Subsets of Data')
+plt.legend()
+plt.grid(True)
+plt.show()
+
 
 

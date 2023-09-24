@@ -216,14 +216,79 @@ with integ:
         with simp_lower:
             lower_limit = st.number_input("Lower Limit", step=1, key='lower_simp')
 
-        #slider for number of divisions
+        # Slider for the number of divisions
         bins = st.slider("Enter number of divisions", 2, 100, 20, key='simpsons')
 
-        #computation of delta_x
+        # Computation of delta_x
         delta_x = (float(upper_limit) - float(lower_limit)) / bins
-        
-        def f_2(x):
+
+        # Function to evaluate the input function_3
+        def f_3(x):
             return eval(convert_syntax(function_3))
         
         def simpsons_rule(func, lower_limit, upper_limit, bins):
-            
+            x_values_exact = np.linspace(lower_limit, upper_limit, 1000)
+            y_values_exact = [func(x) for x in x_values_exact]
+
+            x_values = np.linspace(lower_limit, upper_limit, bins + 1)
+            y_values = [func(x) for x in x_values]
+
+            integral = 0.0
+
+            area_1 = func(x_values[0])
+            area_last = func(x_values[-1])
+
+            # Get odd summation
+            odd_area = 0.0
+            odd_indiv_area = [func(x) for x in x_values[1::2]]
+
+            for i in odd_indiv_area:
+                odd_area = odd_area + i
+
+            # Get even summation
+            even_area = 0.0
+            even_indiv_area = [func(x) for x in x_values[2:-1:2]]
+
+            for i in even_indiv_area:
+                even_area = even_area + i
+
+            integral = (delta_x / 3) * (area_1 + 4 * (odd_area) + 2 * (even_area) + area_last)
+
+            return x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
+
+        # Call the simpsons_rule function and retrieve the results
+        x_values, y_values, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact = simpsons_rule(f_3, lower_limit, upper_limit, bins)
+
+        window_size = 3
+
+        # Create lists to store coefficients and corresponding x values for each subset
+        subset_coefficients = []
+        subset_x_values = []
+
+        # Iterate through the data to create subsets and fit polynomials
+        for i in range(len(x_values) - window_size + 1):
+            x_subset = x_values[i:i + window_size]
+            y_subset = y_values[i:i + window_size]
+
+            # Fit a polynomial to the current subset
+            coefficients = np.polyfit(x_subset, y_subset, 2)  # You can change the degree as needed
+            subset_coefficients.append(coefficients)
+            subset_x_values.append(x_subset)
+
+        # Plot the data points and the fitted polynomials for each subset
+        plt.plot(x_values_exact, y_values_exact, label='Data Points', color='blue', alpha=0.5)
+
+        for coefficients, x_subset in zip(subset_coefficients, subset_x_values):
+            x_fit = np.linspace(min(x_subset), max(x_subset), 100)
+            y_fit = np.polyval(coefficients, x_fit)
+            plt.plot(x_fit, y_fit, linestyle='--', color='red', alpha=0.5)
+
+        plt.xlabel('x')
+        plt.ylabel('f(x)')
+        plt.title('Polynomial Fits for Subsets of Data')
+        plt.legend()
+        plt.grid(True)
+
+        st.pyplot(plt)
+
+    
