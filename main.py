@@ -118,7 +118,10 @@ with integ:
             <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
                 <p style="font-size: 18px; font-weight: bold; color: #333;">Trapezoidal Summation</p>
                 <p style="font-size: 16px; line-height: 1.4; color: #555;">
-                    Trapezoidal Summation uses, well, trapezoid to estimate the area under the function.
+                    Trapezoidal Summation is a numerical integration method used to approximate
+                    the area under a function within a specified range by dividing it into 
+                    trapezoids and summing their areas. This technique provides an estimation 
+                    of definite integrals for various applications.
                 </p>
                 <p style="font-size: 16px; line-height: 1.4; color: #555;">
                     The summation form of this technique is expressed as:
@@ -206,7 +209,11 @@ with integ:
             <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
                 <p style="font-size: 18px; font-weight: bold; color: #333;">Simpson's 1/3 rule Summation</p>
                 <p style="font-size: 16px; line-height: 1.4; color: #555;">
-                    Mamaya na kita bigyan ng intro. x
+                    Simpson's 1/3 rule is a numerical integration approach that calculates 
+                    the area under a curve by dividing it into smaller segments and using 
+                    parabolic approximations to estimate the integral. This method provides 
+                    accurate results for definite integrals and is particularly effective for 
+                    smooth, continuous functions.
                 </p>
                 <p style="font-size: 16px; line-height: 1.4; color: #555;">
                     The summation form of this technique is expressed as:
@@ -217,7 +224,6 @@ with integ:
         )
         #insert latex of the algorithm
         st.latex(r'\int_a^b f(x) \, dx \approx \frac{\Delta x}{3} \left[ f(a) + 4\sum_{i=1}^{n-1} f(x_{2i-1}) + 2\sum_{i=1}^{n-2} f(x_{2i}) + f(b) \right]')
-
         function_3 = st.text_input('Function', key='Simpsons')
 
         simp_upper, simp_lower = st.columns(2)
@@ -235,7 +241,13 @@ with integ:
         delta_x = (float(upper_limit) - float(lower_limit)) / bins
 
         def f_3(x):
-            return eval(convert_syntax(function_3))
+
+            try:
+                evaluated_expression = eval(convert_syntax(function_3))
+                return evaluated_expression
+            except Exception as e:
+                print(f"Error evaluating function: {e}")
+                return 0.0
 
         def simpsons_rule(func, lower_limit, upper_limit, bins):
             x_values_exact = np.linspace(lower_limit, upper_limit, 1000)
@@ -264,13 +276,6 @@ with integ:
                 even_area = even_area + i
             
             integral = (delta_x / 3) * (area_1 + 4 * (odd_area) + 2 * (even_area) + area_last)
-
-            return x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
-
-        # Call the simpsons_rule function and retrieve the results
-        x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact = simpsons_rule(f_3, lower_limit, upper_limit, bins)
-        
-        if function_3 and lower_limit is not None and upper_limit is not None:
 
             definite_integral_latex =rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function_3} \, dx= {integral}'
             st.latex(definite_integral_latex)
@@ -320,4 +325,8 @@ with integ:
             plt.title('Polynomial Fits for Subsets of Data')
             plt.legend()
 
+            return x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
+        
+        if function_3 and lower_limit is not None and upper_limit is not None:
+            result = simpsons_rule(f_3, lower_limit, upper_limit, bins)
             st.pyplot(plt)
