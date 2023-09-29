@@ -1,6 +1,8 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp
+import re
 
 st.title("Numerical Methods")
 
@@ -14,14 +16,21 @@ non_linear, linear, integ = st.tabs(['Non-Linear Equation',
 def convert_syntax(input_str):
     #accomodating exponents
     output_str = input_str.replace('^','**')
-    
+        
     #accomodating trig functions
 
-    trig_functions = ['sin','cos', 'tan','cot', 'csc','sec']
+    trig_functions = ['sin','cos', 'tan']
 
     for trig_func in trig_functions:
         output_str = output_str.replace(trig_func + '(', 'np.' + trig_func + '(')
+
+    # Adding * for multiplication
+    output_str = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', output_str)
+    output_str = re.sub(r'([a-zA-Z])(\d)', r'\1*\2', output_str)
+
     return output_str
+    
+    
 
 with non_linear:
     tab_a, tab_b, tab_c = st.tabs(["Bisection Method",
@@ -90,27 +99,31 @@ with integ:
 
         # latex of function and answer
         if function and lower_limit is not None and upper_limit is not None:
-            integral, x_midpoints = rectangular_integration(f, lower_limit, upper_limit, bins)
-            definite_integral_latex = rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function} \, dx = {integral}'
-            st.latex(definite_integral_latex)
+            try:
+                integral, x_midpoints = rectangular_integration(f, lower_limit, upper_limit, bins)
+                definite_integral_latex = rf'\int_{{{lower_limit}}}^{{{upper_limit}}} {function} \, dx = {integral}'
+                st.latex(definite_integral_latex)
 
-            # graph of function and approximate integral
+                # graph of function and approximate integral
 
-            x_values = np.linspace(lower_limit, upper_limit, 100)
-            y_values = [f(x) for x in x_values]
+                x_values = np.linspace(lower_limit, upper_limit, 100)
+                y_values = [f(x) for x in x_values]
 
-            plt.figure(figsize=(10, 6))
-            plt.plot(x_values, y_values, label=f'Function: {function}')
-            plt.bar(x_midpoints, [f(x) for x in x_midpoints], width=delta_x, alpha=0.5,
-                    color = 'blue', label='Rectangular Approximation', edgecolor = 'black',
-                    linewidth = 2)
-            plt.scatter(x_midpoints, [f(x) for x in x_midpoints], color = 'black')
-            plt.xlabel('x')
-            plt.ylabel('f(x)')
-            plt.title('Function and Rectangular Approximation')
-            plt.legend()
+                plt.figure(figsize=(10, 6))
+                plt.plot(x_values, y_values, label=f'Function: {function}')
+                plt.bar(x_midpoints, [f(x) for x in x_midpoints], width=delta_x, alpha=0.5,
+                        color = 'blue', label='Rectangular Approximation', edgecolor = 'black',
+                        linewidth = 2)
+                plt.scatter(x_midpoints, [f(x) for x in x_midpoints], color = 'black')
+                plt.xlabel('x')
+                plt.ylabel('f(x)')
+                plt.title('Function and Rectangular Approximation')
+                plt.legend()
+                
+                st.pyplot(plt)
             
-            st.pyplot(plt)
+            except Exception as e:
+                st.error(f"Error: Invalid input")
 
     with tab_b:
         st.markdown(
@@ -200,8 +213,12 @@ with integ:
             return integral
 
         if function_2 and lower_limit is not None and upper_limit is not None:
-            result = trapezoidal_integration(f_2, lower_limit, upper_limit, bins)
-            st.pyplot(plt)
+            try:
+                result = trapezoidal_integration(f_2, lower_limit, upper_limit, bins)
+                st.pyplot(plt)
+
+            except Exception as e:
+                st.error(f"Error: Invalid Input")
         
     with tab_c:
         st.markdown(
@@ -242,12 +259,8 @@ with integ:
 
         def f_3(x):
 
-            try:
-                evaluated_expression = eval(convert_syntax(function_3))
-                return evaluated_expression
-            except Exception as e:
-                print(f"Error evaluating function: {e}")
-                return 0.0
+            return eval(convert_syntax(function_3))
+
 
         def simpsons_rule(func, lower_limit, upper_limit, bins):
             x_values_exact = np.linspace(lower_limit, upper_limit, 1000)
@@ -328,5 +341,10 @@ with integ:
             return x_values_simp, y_values_simp, area_1, odd_indiv_area, odd_area, even_area, integral, x_values_exact, y_values_exact
         
         if function_3 and lower_limit is not None and upper_limit is not None:
-            result = simpsons_rule(f_3, lower_limit, upper_limit, bins)
-            st.pyplot(plt)
+            try:
+
+                result = simpsons_rule(f_3, lower_limit, upper_limit, bins)
+                st.pyplot(plt)
+            
+            except Exception as e:
+                st.error(f"Error: Invalid Input")
